@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Распускающийся цветок</title>
+<style>
+{ margin: 0; padding: 0; box-sizing: border-box; }
+body {
+font-family: 'Segoe UI', Tahoma, sans-serif;
+background: linear-gradient(135deg, #1e3c2a 0%, #2d5a3d 50%, #3a6b4a 100%);
+min-height: 100vh;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+color: #e8f5e9;
+padding: 20px;
+overflow: hidden;
+}
+h1 {
+font-size: 28px;
+font-weight: 300;
+letter-spacing: 3px;
+margin-bottom: 20px;
+color: #f0f7f0;
+text-transform: uppercase;
+}
+.garden {
+position: relative;
+width: 600px;
+max-width: 95vw;
+height: 400px;
+background: linear-gradient(to bottom, #87b8d4 0%, #a8d0e0 60%, #6b8e4e 60%, #4a6b35 100%);
+border-radius: 12px;
+overflow: hidden;
+box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+border: 2px solid #2d4a20;
+}
+/* Солнце */
+.sun {
+position: absolute;
+top: 30px;
+right: 50px;
+width: 60px;
+height: 60px;
+background: radial-gradient(circle, #fff4b0 0%, #ffd966 70%, transparent 100%);
+border-radius: 50%;
+box-shadow: 0 0 40px rgba(255,217,102,0.6);
+pointer-events: none;
+}
+/* Облака */
+.cloud {
+position: absolute;
+background: rgba(255,255,255,0.7);
+border-radius: 50px;
+pointer-events: none;
+}
+.cloud.c1 { top: 50px; left: 60px; width: 80px; height: 25px; }
+.cloud.c2 { top: 80px; left: 200px; width: 100px; height: 30px; opacity: 0.6; }
+/* Трава-детали */
+.garden::after {
+content: '';
+position: absolute;
+bottom: 0; left: 0; right: 0;
+height: 40%;
+background-image:
+  radial-gradient(ellipse at 20% 100%, rgba(255,255,255,0.05) 0%, transparent 40%),
+  radial-gradient(ellipse at 80% 100%, rgba(255,255,255,0.05) 0%, transparent 40%);
+pointer-events: none;
+}
+/* Горшок */
+.pot {
+position: absolute;
+left: 50%;
+bottom: 20px;
+transform: translateX(-50%);
+width: 110px;
+height: 80px;
+background: linear-gradient(to bottom, #b8653a 0%, #8b4513 100%);
+border-radius: 6px 6px 12px 12px;
+box-shadow: inset -8px 0 15px rgba(0,0,0,0.3), 0 5px 15px rgba(0,0,0,0.4);
+z-index: 2;
+}
+.pot::before {
+content: '';
+position: absolute;
+top: -10px; left: -8px; right: -8px;
+height: 18px;
+background: linear-gradient(to bottom, #c87a4a 0%, #8b4513 100%);
+border-radius: 4px;
+box-shadow: inset -6px 0 10px rgba(0,0,0,0.3);
+}
+/* Стебель */
+.stem {
+position: absolute;
+left: 50%;
+bottom: 95px;
+transform: translateX(-50%);
+width: 6px;
+height: 130px;
+background: linear-gradient(to right, #3d6b2e 0%, #5a8a3e 50%, #3d6b2e 100%);
+border-radius: 3px;
+z-index: 1;
+}
+/* Листья */
+.leaf {
+position: absolute;
+left: 50%;
+width: 35px;
+height: 18px;
+background: linear-gradient(to bottom, #6b9a4a 0%, #4a7a32 100%);
+border-radius: 0 100% 0 100%;
+z-index: 1;
+}
+.leaf.l1 { bottom: 150px; transform: translateX(-100%) rotate(-25deg); }
+.leaf.l2 { bottom: 180px; transform: translateX(0%) rotate(25deg) scaleX(-1); }
+/* Цветок (бутон → распустившийся) */
+.flower {
+position: absolute;
+left: 50%;
+bottom: 220px;
+transform: translateX(-50%);
+width: 120px;
+height: 120px;
+cursor: pointer;
+z-index: 3;
+transition: transform 0.3s ease;
+}
+.flower:hover:not(.bloomed) {
+transform: translateX(-50%) scale(1.08);
+}
+.flower.shake {
+animation: shake 0.4s ease;
+}
+@keyframes shake {
+0%, 100% { transform: translateX(-50%) rotate(0); }
+25% { transform: translateX(-50%) rotate(-5deg); }
+75% { transform: translateX(-50%) rotate(5deg); }
+}
+/* Лепестки */
+.petal {
+position: absolute;
+top: 50%;
+left: 50%;
+width: 40px;
+height: 55px;
+background: linear-gradient(to bottom, #ff9ec7 0%, #e06ba8 100%);
+border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+transform-origin: 50% 100%;
+transition: transform 1.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.6s ease;
+box-shadow: inset 0 -5px 10px rgba(180, 60, 120, 0.3);
+}
+/* Бутон: лепестки сжаты в центр */
+.petal.p1 { transform: translate(-50%, -100%) rotate(0deg) scale(0.4); }
+.petal.p2 { transform: translate(-50%, -100%) rotate(60deg) scale(0.4); }
+.petal.p3 { transform: translate(-50%, -100%) rotate(120deg) scale(0.4); }
+.petal.p4 { transform: translate(-50%, -100%) rotate(180deg) scale(0.4); }
+.petal.p5 { transform: translate(-50%, -100%) rotate(240deg) scale(0.4); }
+.petal.p6 { transform: translate(-50%, -100%) rotate(300deg) scale(0.4); }
+/* Распустившийся цветок */
+.flower.bloomed .petal.p1 { transform: translate(-50%, -100%) rotate(0deg) scale(1); }
+.flower.bloomed .petal.p2 { transform: translate(-50%, -100%) rotate(60deg) scale(1); }
+.flower.bloomed .petal.p3 { transform: translate(-50%, -100%) rotate(120deg) scale(1); }
+.flower.bloomed .petal.p4 { transform: translate(-50%, -100%) rotate(180deg) scale(1); }
+.flower.bloomed .petal.p5 { transform: translate(-50%, -100%) rotate(240deg) scale(1); }
+.flower.bloomed .petal.p6 { transform: translate(-50%, -100%) rotate(300deg) scale(1); }
+.flower.bloomed {
+animation: sway 3s ease-in-out infinite;
+}
+@keyframes sway {
+0%, 100% { transform: translateX(-50%) rotate(-2deg); }
+50% { transform: translateX(-50%) rotate(2deg); }
+}
+/* Центр цветка */
+.flower-center {
+position: absolute;
+top: 50%;
+left: 50%;
+width: 30px;
+height: 30px;
+background: radial-gradient(circle, #ffe066 0%, #f0a030 100%);
+border-radius: 50%;
+transform: translate(-50%, -50%);
+z-index: 4;
+box-shadow: 0 0 15px rgba(255,200,80,0.6);
+transition: transform 0.6s ease, box-shadow 0.6s ease;
+}
+.flower.bloomed .flower-center {
+transform: translate(-50%, -50%) scale(1.3);
+box-shadow: 0 0 25px rgba(255,220,100,0.9);
+}
+/* Секретный предмет — светлячок внутри цветка */
+.secret {
+position: absolute;
+top: 50%;
+left: 50%;
+width: 14px;
+height: 14px;
+background: radial-gradient(circle, #ffffff 0%, #b0e0ff 60%, transparent 100%);
+border-radius: 50%;
+transform: translate(-50%, -50%) scale(0);
+opacity: 0;
+transition: opacity 1s ease 0.8s, transform 1s ease 0.8s;
+pointer-events: none;
+z-index: 5;
+}
+.secret.visible {
+opacity: 1;
+transform: translate(-50%, -50%) scale(1);
+animation: firefly 2.5s ease-in-out infinite;
+}
+@keyframes firefly {
+0%, 100% {
+  filter: drop-shadow(0 0 8px rgba(180,230,255,0.9));
+  transform: translate(-50%, -50%) scale(1);
+}
+50% {
+  filter: drop-shadow(0 0 20px rgba(200,240,255,1));
+  transform: translate(-50%, -60%) scale(1.2);
+}
+}
+/* Лейка */
+.watering-can {
+position: absolute;
+left: 50px;
+bottom: 30px;
+width: 80px;
+height: 60px;
+cursor: pointer;
+transition: transform 0.4s ease, opacity 0.4s ease, filter 0.3s ease;
+filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
+z-index: 10;
+}
+.watering-can:hover {
+transform: scale(1.1) rotate(-5deg);
+filter: drop-shadow(0 6px 15px rgba(100,180,255,0.7));
+}
+.watering-can.found {
+opacity: 0;
+transform: scale(0) rotate(360deg);
+pointer-events: none;
+}
+/* SVG-элементы лейки */
+.can-body {
+fill: #5a8fb8;
+stroke: #2d5a7a;
+stroke-width: 2;
+}
+.can-spout {
+fill: #5a8fb8;
+stroke: #2d5a7a;
+stroke-width: 2;
+}
+.can-handle {
+fill: none;
+stroke: #2d5a7a;
+stroke-width: 3;
+}
+/* Сообщение */
+.message {
+position: absolute;
+bottom: 30px;
+left: 50%;
+transform: translateX(-50%) translateY(20px);
+background: rgba(20,40,30,0.95);
+color: #fff;
+padding: 14px 28px;
+border-radius: 30px;
+font-size: 15px;
+letter-spacing: 1px;
+opacity: 0;
+transition: opacity 0.4s ease, transform 0.4s ease;
+border: 1px solid rgba(150,220,150,0.4);
+box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+pointer-events: none;
+white-space: nowrap;
+z-index: 100;
+}
+.message.show {
+opacity: 1;
+transform: translateX(-50%) translateY(0);
+}
+/* Подсказка */
+.hint {
+margin-top: 20px;
+font-size: 13px;
+color: rgba(240,247,240,0.6);
+letter-spacing: 1px;
+text-align: center;
+}
+</style>
+</head>
+<body>
+<h1>🌸 Распускающийся цветок</h1>
+<div class="garden">
+<div class="sun"></div>
+<div class="cloud c1"></div>
+<div class="cloud c2"></div>
+<!-- Лейка -->
+<svg class="watering-can" id="wateringCan" viewBox="0 0 100 80">
+  <path class="can-body" d="M 20 30 L 70 30 L 75 65 L 15 65 Z"/>
+  <path class="can-spout" d="M 70 35 L 95 20 L 95 28 L 75 45 Z"/>
+  <path class="can-handle" d="M 25 30 Q 10 15 25 10 Q 40 10 40 30"/>
+  <circle cx="95" cy="24" r="2" fill="#2d5a7a"/>
+</svg>
+<!-- Растение -->
+<div class="stem"></div>
+<div class="leaf l1"></div>
+<div class="leaf l2"></div>
+<!-- Цветок -->
+<div class="flower" id="flower">
+  <div class="petal p1"></div>
+  <div class="petal p2"></div>
+  <div class="petal p3"></div>
+  <div class="petal p4"></div>
+  <div class="petal p5"></div>
+  <div class="petal p6"></div>
+  <div class="flower-center"></div>
+  <div class="secret" id="secret"></div>
+</div>
+<!-- Горшок -->
+<div class="pot"></div>
+<!-- Сообщение -->
+<div class="message" id="message"></div>
+</div>
+<div class="hint">Найди лейку и полей цветок 🌱</div>
+<script>
+  const wateringCan = document.getElementById('wateringCan');
+  const flower = document.getElementById('flower');
+  const secret = document.getElementById('secret');
+  const message = document.getElementById('message');
+// Состояния
+  let waterFound = false;
+  let flowerBloomed = false;
+  let questCompleted = false;
+function showMessage(text, duration = 2500) {
+    message.textContent = text;
+    message.classList.add('show');
+    clearTimeout(message._timeout);
+    message._timeout = setTimeout(() => {
+      message.classList.remove('show');
+    }, duration);
+  }
+// Клик по лейке — находим воду
+  wateringCan.addEventListener('click', () => {
+    if (waterFound) return;
+    waterFound = true;
+    wateringCan.classList.add('found');
+    showMessage('💧 Лейка найдена! Теперь полей цветок.');
+  });
+// Клик по цветку
+  flower.addEventListener('click', () => {
+    if (questCompleted) return;
+if (!waterFound) {
+  // Вода не найдена — цветок не распускается
+  flower.classList.remove('shake');
+  void flower.offsetWidth; // перезапуск анимации
+  flower.classList.add('shake');
+  showMessage('🚿 Сначала найди лейку!');
+  return;
+}
+
+if (!flowerBloomed) {
+  // Вода найдена — цветок распускается
+  flowerBloomed = true;
+  flower.classList.add('bloomed');
+  showMessage('🌸 Цветок распустился! Посмотри, что внутри...');
+
+  // Показываем секретный предмет
+  setTimeout(() => {
+    secret.classList.add('visible');
+  }, 600);
+
+  // Завершение квеста
+  setTimeout(() => {
+    questCompleted = true;
+    showMessage('✨ Квест завершён! ✨', 4000);
+  }, 1800);
+}
+});
+</script>
+</body>
+</html>
